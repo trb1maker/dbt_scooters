@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  postgres-start:
+    cmds:
+      - docker compose up -d
+    silent: true
+
+  postgres-stop:
+    cmds:
+      - docker compose down
+    silent: true
+  
+  upload-raw:
+    dotenv:
+      - .env
+    cmds:
+      - uv run scooters_data_uploader/uploader.py upload postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
+    silent: true
