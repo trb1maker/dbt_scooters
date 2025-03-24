@@ -22,6 +22,10 @@ jobs:
       - name: Prepare connection profile
         run: cp ./scooters/profiles.example.yml ./scooters/profiles.yml
       
+      - name: Install deps
+        working-directory: ./scooters
+        run: dbt deps
+      
       - name: Generate docs
         working-directory: ./scooters
         run: dbt docs generate
