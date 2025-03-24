@@ -1,0 +1,44 @@
+name: Deploy dbt docs (Data Catalog) to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      
+      - name: Prepare connection profile
+        run: cp ./scooters/profiles.example.yml ./scooters/profiles.yml
+      
+      - name: Generate docs
+        working-directory: ./scooters
+        run: dbt docs generate
+        env:
+          DBT_POSTGRES_DB: ${{ secrets.DBT_POSTGRES_DB }}
+          DBT_POSTGRES_USER: ${{ secrets.DBT_POSTGRES_USER }}
+          DBT_POSTGRES_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
+      
+      - name: Prepare site files
+        run: |
+          mkdir site
+          cp ./scooters/target/index.html site/
+          cp ./scooters/target/manifest.json site/
+          cp ./scooters/target/catalog.json site/
+      
+      - name: Commit site for GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
