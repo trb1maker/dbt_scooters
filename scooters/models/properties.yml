@@ -1,0 +1,116 @@
+sources:
+  - name: scooters_raw
+    description: Raw data provided by scooters service
+    loader: scooters_data_uploader
+    tables:
+      - name: trips
+        description: Scooter trips
+        loaded_at_field: finished_at
+        freshness:
+          warn_after:
+            count: 1
+            period: day
+          error_after:
+            count: 1095
+            period: day
+        columns:
+          - name: user_id
+            description: User identifier
+            data_tests:
+              - not_null
+              - relationships:
+                  name: every_trip_has_user
+                  to: source('scooters_raw', 'users')
+                  field: id
+      
+      - name: users
+        description: Users of scooter service
+        columns:
+          - name: sex
+            description: User gender
+            data_tests:
+              - accepted_values:
+                  values: ['F', 'M']
+              - not_null:
+                  config:
+                    severity: warn
+      
+      - name: events
+        description: Raw user events with duplicates
+
+models:
+  - name: trips_prep
+    description: Trips prepared for analysis
+    config:
+      materialized: view
+  
+  - name: trips_stat
+    description: Overall trips statistics
+  
+  - name: trips_stat_daily
+    description: Overall trips statistics per day
+    config:
+      indexes:
+        - columns: [date]
+  
+  - name: trips_age_daily
+    description: Daily trips statistics by user age
+    data_tests:
+      - unique:
+          column_name: "date::text || age::text"
+      - unique_key:
+          columns: [date, age]
+  
+  - name: trips_age_daily_stat
+    description: Aggregation of daily trips statistics by user age
+  
+  - name: trips_geom
+    description: Trips prepared for geometry analysis
+    config:
+      materialized: view
+  
+  - name: parking_start_stat
+    description: Trip start parking statistics by 500 m hexagons
+  
+  - name: parking_finish_stat
+    description: Trip finish parking statistics by 10 m hexagons
+  
+  - name: trips_users
+    description: Prepared trips enriched with users data
+    config:
+      materialized: incremental
+      post-hook:
+        - analyze scooters.trips_users
+        - sql: vacuum scooters.trips_users
+          transaction: false
+  
+  - name: events_clean
+    description: User events without duplicates
+    config:
+      materialized: incremental
+      strategy: merge
+      unique_key: [user_id, timestamp, type_id]
+  
+  - name: trips_concurrency
+    description: Number of simultaneous rides in time
+    config:
+      materialized: incremental
+  
+  - name: companies
+    description: Scooter satistics by company
+  
+  - name: companies_trips
+    description: Trip satistics by company
+    columns:
+      - name: company
+        description: Scooters manufacturing company
+        data_tests:
+          - unique
+  
+  - name: events_full
+    description: User events enriched with meaningful types
+    config:
+      materialized: view
+  
+  - name: events_stat
+    description: Overall user events statistics

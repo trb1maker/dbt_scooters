@@ -1,0 +1,36 @@
+name: 'scooters'
+version: '1.0.0'
+
+profile: 'scooters'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+on-run-end:
+  - grant usage on schema scooters_finance to finance;
+
+models:
+  scooters:
+    +materialized: table
+    +on_schema_change: append_new_columns
+    +persist_docs:
+      relation: true
+      columns: true
+    finance:
+      +schema: finance
+      +grants:
+        select: [finance]
+
+seeds:
+  dbt_scooters:
+    +persist_docs:
+      relation: true
+      columns: true
