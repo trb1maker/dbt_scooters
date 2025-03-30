@@ -1,7 +1,7 @@
 select
     date,
     age,
-    count(*) trips,
-    sum(price_rub) revenue_rub
+    count(*) as trips,
+    sum(price_rub) as revenue_rub
 from {{ ref("trips_users") }}
 group by 1, 2

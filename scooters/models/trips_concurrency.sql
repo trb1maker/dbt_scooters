@@ -1,16 +1,16 @@
 with
 unnest_cte as (
     select
-        unnest(array[started_at, finished_at]) "timestamp",
-        unnest(array[1, -1]) increment
+        unnest(array[started_at, finished_at]) as "timestamp",
+        unnest(array[1, -1]) as increment
     from {{ source('scooters_raw', 'trips') }}
 ),
 
 sum_cte as (
     select
         "timestamp",
-        sum(increment) increment,
-        true preserve_row
+        sum(increment) as increment,
+        true as preserve_row
     from unnest_cte
     where
         {% if is_incremental() %}
@@ -23,8 +23,8 @@ sum_cte as (
         union all
         select
             "timestamp",
-            concurrency increment,
-            false preserve_row
+            concurrency as increment,
+            false as preserve_row
         from {{ this }}
         where "timestamp" = (select max("timestamp") from {{ this }})
     {% endif %}
@@ -33,10 +33,10 @@ sum_cte as (
 cumsum_cte as (
     select
         "timestamp",
+        preserve_row,
         sum(increment) over (
             order by "timestamp"
-        ) concurrency,
-        preserve_row
+        ) as concurrency
     from sum_cte
 )
 

@@ -5,8 +5,8 @@ with montly_trips_stats as (
      */
     select
         user_id,
-        date_trunc('month', date) "month",
-        count(*) trips_per_month
+        date_trunc('month', date) as "month",
+        count(*) as trips_per_month
     from {{ ref('trips_prep') }}
     group by 1, 2
 )

@@ -1,6 +1,6 @@
 select
     date,
-    sum(price_rub) revenue_rub,
+    sum(price_rub) as revenue_rub,
     {{ updated_at() }}
 from {{ ref('trips_prep') }}
 {% if is_incremental() %}

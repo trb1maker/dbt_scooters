@@ -1,10 +1,10 @@
 select
     t.*,
     u.sex,
-    extract(year from t.started_at) - extract(year from u.birth_date) age,
+    extract(year from t.started_at) - extract(year from u.birth_date) as age,
     {{ updated_at() }}
-from {{ ref('trips_prep') }} t
-left join {{ ref('users_prep') }} u
+from {{ ref('trips_prep') }} as t
+left join {{ ref('users_prep') }} as u
     on t.user_id = u.id
 where
     {% if is_incremental() %}
