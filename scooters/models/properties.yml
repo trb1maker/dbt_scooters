@@ -141,3 +141,48 @@ models:
       Retention analysis which tells how many people
       started search for scooter and finally booked it on or after
       1, 7, 14 days (or weeks, months, years), etc
+  
+  - name: users_prep
+    description: Users prepared for analysis without sensitive data
+    config:
+      materialized: view
+  
+  - name: users_class_weekly_trips
+    description: Классификация пользователей по поездкам в течение недели
+    data_tests:
+      - unique_key:
+          columns: [user_id]
+    columns:
+      - name: regular
+        description: Регулярный пользователь, катается не менее 3 дней в неделю
+      - name: fan
+        description: Фанат, пользуется сервисом в среднем не менее 6 дней в неделю
+  
+  - name: users_class_weekly_destination_trips
+    description: Для каждого пользователя находим список уникальных точек назначения и статистику по поездкам туда
+    data_tests:
+      - unique_key:
+          columns: [user_id]
+  
+  - name: users_class_monthly_trips
+    description: Классификация пользователей по количеству поездок в месяц
+    data_tests:
+      - unique_key:
+          columns: [user_id]
+    columns:
+      - name: rare
+        description: редкие/разовые поездки, не более 2 поездок в месяц
+  
+  - name: users_class
+    description: >
+      Combining all features into a consolidated table.
+      Joining with the users table to label each user
+    data_tests:
+      - unique_key:
+          columns: [user_id]
+  
+  - name: users_class_stat
+    description: >
+      Calculation of overall group statistics:
+        - number of users in each group
+        - total number of users for information and validation
