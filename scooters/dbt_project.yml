@@ -17,6 +17,9 @@ clean-targets:
 on-run-end:
   - grant usage on schema scooters_finance to finance;
 
+vars:
+  'dbt_date:time_zone': 'Europe/Moscow'
+
 models:
   scooters:
     +materialized: table
