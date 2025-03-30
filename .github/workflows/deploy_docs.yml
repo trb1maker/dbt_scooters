@@ -35,6 +35,7 @@ jobs:
           DBT_POSTGRES_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
       
       - name: Run linter
+        working-directory: ./scooters
         run: sqlfluff lint
         env:
           DBT_ENV_SECRET_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
