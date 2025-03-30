@@ -5,6 +5,15 @@ scooters:
       host: 5.189.39.231
       pass: "{{ env_var('DBT_POSTGRES_PASSWORD') }}"
       port: 5432
+      schema: scooters_dev
+      threads: 4
+      type: postgres
+      user: "{{ env_var('DBT_POSTGRES_USER') }}"
+    prod:
+      dbname: "{{ env_var('DBT_POSTGRES_DB') }}"
+      host: 5.189.39.231
+      pass: "{{ env_var('DBT_POSTGRES_PASSWORD') }}"
+      port: 5432
       schema: scooters
       threads: 4
       type: postgres

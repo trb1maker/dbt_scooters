@@ -1,0 +1,53 @@
+name: Deploy dbt docs (Data Catalog) to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 🚀 Deploy dbt project
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DBT_POSTGRES_DB: ${{ secrets.DBT_POSTGRES_DB }}
+      DBT_POSTGRES_USER: ${{ secrets.DBT_POSTGRES_USER }}
+      DBT_POSTGRES_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: ⚙️ Install requirements
+        run: pip install -r requirements.txt
+      
+      - name: ⚙️ Prepare profile
+        working-directory: ./scooters
+        run: |
+          cp profiles.example.yml profiles.yml
+          dbt deps
+          dbt docs generate
+      
+      - name: ✅ Run linter
+        working-directory: ./scooters
+        run: sqlfluff lint
+      
+      - name: 🏗️️ Build production environment
+        working-directory: ./scooters
+        run: dbt build --target prod
+      
+      - name: 🗃️ Generate Data Catalog
+        run: |
+          mkdir site
+          cp ./scooters/target/index.html site/
+          cp ./scooters/target/manifest.json site/
+          cp ./scooters/target/catalog.json site/
+      
+      - name: ⬆️ Commit Data Catalog for GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
