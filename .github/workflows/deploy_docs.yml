@@ -30,14 +30,14 @@ jobs:
         working-directory: ./scooters
         run: dbt docs generate
         env:
-          DBT_ENV_SECRET_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
+          DBT_POSTGRES_DB: ${{ secrets.DBT_POSTGRES_DB }}
+          DBT_POSTGRES_USER: ${{ secrets.DBT_POSTGRES_USER }}
+          DBT_POSTGRES_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
       
       - name: Run linter
         working-directory: ./scooters
         run: sqlfluff lint
         env:
-          DBT_POSTGRES_DB: ${{ secrets.DBT_POSTGRES_DB }}
-          DBT_POSTGRES_USER: ${{ secrets.DBT_POSTGRES_USER }}
           DBT_ENV_SECRET_PASSWORD: ${{ secrets.DBT_POSTGRES_PASSWORD }}
       
       - name: Prepare site files
