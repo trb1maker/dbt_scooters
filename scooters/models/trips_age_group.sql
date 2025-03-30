@@ -1,6 +1,6 @@
-select  
-    "group"        age_group,
-    count(*)       trips,
+select
+    "group" age_group,
+    count(*) trips,
     sum(price_rub) revenue_rub
 from {{ ref('trips_users') }} t
 join {{ ref('age_groups') }} a

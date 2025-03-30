@@ -7,13 +7,17 @@ select distinct
     {{ updated_at() }}
 from {{ source('scooters_raw', 'events') }}
 where
-{% if is_incremental() %}
-    {% if date %}
+    {% if is_incremental() %}
+        {% if date %}
         date(timestamp) = date '{{ date }}'
     {% else %}
-        "timestamp" > (select date(max("timestamp")) + interval '2' month from {{ this }})
-    {% endif %}
-{% else %}
+            "timestamp"
+            > (
+                select date(max("timestamp")) + interval '2' month
+                from {{ this }}
+            )
+        {% endif %}
+    {% else %}
     "timestamp" < timestamp '2023-08-01'
 {% endif %}
 order by 2, 1, 3

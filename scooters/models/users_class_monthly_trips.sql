@@ -6,10 +6,11 @@ with montly_trips_stats as (
     select
         user_id,
         date_trunc('month', date) "month",
-        count(*)                  trips_per_month
+        count(*) trips_per_month
     from {{ ref('trips_prep') }}
     group by 1, 2
 )
+
 select
     user_id,
     sum(trips_per_month) <= 2 as rare

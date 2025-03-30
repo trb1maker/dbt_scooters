@@ -7,7 +7,9 @@ daily_stat_cte as (
      */
     select
         user_id,
-        st_snaptogrid(st_makepoint(finish_lon, finish_lat), 0.001) as destination,
+        st_snaptogrid(
+            st_makepoint(finish_lon, finish_lat), 0.001
+        ) as destination,
         "date",
         count(
             case when extract(
@@ -17,6 +19,7 @@ daily_stat_cte as (
     from {{ ref('trips_prep') }}
     group by 1, 2, 3
 ),
+
 weekly_stat_cte as (
     /*
      * For each user, we find the trip statistics to each destination
@@ -27,12 +30,14 @@ weekly_stat_cte as (
         user_id,
         destination,
         date_trunc('week', "date") as "week",
-        count(distinct
+        count(
+            distinct
             case when morning_trips > 0 then "date" end
         ) as morning_trip_days
     from daily_stat_cte
     group by 1, 2, 3
 ),
+
 prep_weekly_destination_trips_cte as (
     /*
      * Preparing data for profiling users based on trips to a specific destination during the week.
@@ -47,6 +52,7 @@ prep_weekly_destination_trips_cte as (
     from weekly_stat_cte
     group by 1, 2
 )
+
 select
     user_id,
     max(avg_morning_trip_days) >= 3 as to_work

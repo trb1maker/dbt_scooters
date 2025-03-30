@@ -7,6 +7,7 @@ with company_trips as (
         on t.scooter_hw_id = s.hardware_id
     group by 1
 )
+
 select
     t.company,
     t.trips,
